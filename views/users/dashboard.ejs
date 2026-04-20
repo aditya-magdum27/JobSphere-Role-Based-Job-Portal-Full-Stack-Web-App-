@@ -1,0 +1,198 @@
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/flash') %>
+<main class="main-content">
+
+<div class="page-hero">
+  <div class="container">
+    <div class="d-flex align-items-center gap-3">
+      <% if (currentUser.image && currentUser.image.url) { %>
+        <img src="<%= currentUser.image.url %>" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,0.25);flex-shrink:0;" />
+      <% } else { %>
+        <div style="width:52px;height:52px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:white;flex-shrink:0;">
+          <%= currentUser.username.charAt(0).toUpperCase() %>
+        </div>
+      <% } %>
+      <div>
+        <p class="section-label text-white opacity-50 mb-0">My Dashboard</p>
+        <h1 class="text-white mb-0" style="font-size:clamp(1.4rem,4vw,1.9rem);">Hey, <%= currentUser.username %> 👋</h1>
+        <p class="mb-0" style="color:rgba(255,255,255,0.5);font-size:0.83rem;"><%= currentUser.role.charAt(0).toUpperCase()+currentUser.role.slice(1) %> Account</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container mt-4">
+
+<% if (currentUser.role === 'employer') { %>
+  <!-- Stats -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-orange"><i class="bi bi-send-check"></i></div>
+        <div><div class="stat-number"><%= data.appliedJobs.length %></div><div class="stat-label">Applications</div></div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-blue"><i class="bi bi-bookmark-heart"></i></div>
+        <div><div class="stat-number"><%= data.savedJobs.length %></div><div class="stat-label">Saved Jobs</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Applied Jobs -->
+  <div class="mb-4">
+    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+      <h4 class="font-syne fw-700 mb-0">My Applications</h4>
+      <a href="/jobs" class="btn btn-sm btn-ink px-3">Browse More Jobs</a>
+    </div>
+    <% if (data.appliedJobs.length===0) { %>
+      <div class="card-clean">
+        <div class="empty-state">
+          <div class="empty-state-icon"><i class="bi bi-send"></i></div>
+          <h4>No applications yet</h4>
+          <p>Start exploring jobs and apply to kickstart your journey.</p>
+          <a href="/jobs" class="btn btn-accent mt-2">Browse Jobs</a>
+        </div>
+      </div>
+    <% } else { %>
+      <div class="row g-3">
+        <% data.appliedJobs.forEach(function(job){ %>
+          <div class="col-12 col-md-6">
+            <div class="job-card" data-href="/jobs/<%= job._id %>">
+              <div class="d-flex align-items-center gap-3">
+                <% if (job.logo && job.logo.url) { %>
+                  <img src="<%= job.logo.url %>" class="job-logo" alt="logo" />
+                <% } else { %>
+                  <div class="job-logo-placeholder"><%= job.companyName.charAt(0).toUpperCase() %></div>
+                <% } %>
+                <div style="min-width:0;">
+                  <a href="/jobs/<%= job._id %>" class="job-card-title text-truncate" style="font-size:0.95rem;"><%= job.title %></a>
+                  <div class="job-company text-truncate"><%= job.companyName %></div>
+                </div>
+              </div>
+              <div class="job-meta mt-3">
+                <%
+                  var tcMap={'Full-Time':'badge-full-time','Internship':'badge-internship','Part-Time':'badge-part-time','Contract':'badge-contract','Remote':'badge-remote'};
+                  var tc=tcMap[job.type]||'badge-full-time';
+                  var myApp=job.applications.find(function(a){
+                    var aid=a.applicant&&a.applicant._id?a.applicant._id:a.applicant;
+                    return aid&&aid.toString()===currentUser._id.toString();
+                  });
+                %>
+                <span class="badge-type <%= tc %>"><%= job.type %></span>
+                <% if (myApp) { %><span class="badge-type badge-status-<%= myApp.status %>"><%= myApp.status %></span><% } %>
+              </div>
+              <div class="job-card-footer">
+                <span class="job-date"><i class="bi bi-clock me-1"></i><%= new Date(job.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}) %></span>
+                <a href="/jobs/<%= job._id %>" class="btn btn-ink btn-sm" style="font-size:0.78rem;">View</a>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Saved Jobs Preview -->
+  <% if (data.savedJobs && data.savedJobs.length>0) { %>
+    <div class="mb-4">
+      <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+        <h4 class="font-syne fw-700 mb-0">Saved Jobs</h4>
+        <a href="/users/saved" class="btn btn-sm btn-outline-ink px-3">View All</a>
+      </div>
+      <div class="row g-3">
+        <% data.savedJobs.slice(0,3).forEach(function(job){ %>
+          <div class="col-12 col-md-4">
+            <div class="job-card" data-href="/jobs/<%= job._id %>">
+              <a href="/jobs/<%= job._id %>" class="job-card-title text-truncate"><%= job.title %></a>
+              <div class="job-company text-truncate"><%= job.companyName %></div>
+              <div class="job-card-footer">
+                <span class="job-date"><i class="bi bi-geo-alt me-1"></i><%= job.location||'Remote' %></span>
+                <a href="/jobs/<%= job._id %>" class="btn btn-ink btn-sm" style="font-size:0.78rem;">View</a>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  <% } %>
+
+<% } else if (currentUser.role === 'recruiter') { %>
+  <!-- Recruiter Stats -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-orange"><i class="bi bi-briefcase"></i></div>
+        <div><div class="stat-number"><%= data.postedJobs.length %></div><div class="stat-label">Jobs Posted</div></div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-green"><i class="bi bi-people"></i></div>
+        <div><div class="stat-number"><%= data.totalApplications %></div><div class="stat-label">Total Applicants</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+    <h4 class="font-syne fw-700 mb-0">My Job Listings</h4>
+    <a href="/jobs/new" class="btn btn-accent btn-sm px-3"><i class="bi bi-plus-lg me-1"></i>Post New Job</a>
+  </div>
+
+  <% if (data.postedJobs.length===0) { %>
+    <div class="card-clean">
+      <div class="empty-state">
+        <div class="empty-state-icon"><i class="bi bi-briefcase"></i></div>
+        <h4>No jobs posted yet</h4>
+        <p>Post your first job to start finding great candidates.</p>
+        <a href="/jobs/new" class="btn btn-accent mt-2">Post a Job</a>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="card-clean">
+      <div class="table-responsive-wrapper">
+        <table class="table applicants-table mb-0">
+          <thead><tr><th>Job Title</th><th>Type</th><th>Applicants</th><th>Status</th><th>Posted</th><th>Actions</th></tr></thead>
+          <tbody>
+            <% data.postedJobs.forEach(function(job){ %>
+              <tr>
+                <td>
+                  <a href="/jobs/<%= job._id %>" class="fw-700 text-decoration-none font-syne" style="color:var(--ink);font-size:0.875rem;"><%= job.title %></a>
+                  <div class="text-truncate" style="font-size:0.75rem;color:var(--text-muted);max-width:180px;"><%= job.companyName %></div>
+                </td>
+                <td>
+                  <%
+                    var tcMap2={'Full-Time':'badge-full-time','Internship':'badge-internship','Part-Time':'badge-part-time','Contract':'badge-contract','Remote':'badge-remote'};
+                    var tc2=tcMap2[job.type]||'badge-full-time';
+                  %>
+                  <span class="badge-type <%= tc2 %>"><%= job.type %></span>
+                </td>
+                <td><strong><%= job.applications.length %></strong></td>
+                <td>
+                  <% if (job.isActive) { %>
+                    <span class="badge-type" style="background:rgba(26,171,95,0.1);color:var(--success);">Active</span>
+                  <% } else { %>
+                    <span class="badge-type" style="background:rgba(229,62,62,0.1);color:var(--danger);">Closed</span>
+                  <% } %>
+                </td>
+                <td style="font-size:0.78rem;color:var(--text-muted);white-space:nowrap;"><%= new Date(job.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}) %></td>
+                <td>
+                  <div class="d-flex gap-1">
+                    <a href="/jobs/<%= job._id %>" class="btn btn-sm" style="background:var(--surface);border:1px solid var(--border);border-radius:6px;font-size:0.72rem;padding:4px 10px;font-weight:600;">View</a>
+                    <a href="/jobs/<%= job._id %>/edit" class="btn btn-sm btn-ink" style="font-size:0.72rem;padding:4px 10px;">Edit</a>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% } %>
+<% } %>
+</div>
+</main>
+<%- include('../partials/footer') %>
+<%- include('../partials/scripts') %>

@@ -1,0 +1,147 @@
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/flash') %>
+<main class="main-content">
+<div class="container mt-3">
+  <div class="row justify-content-center">
+    <div class="col-lg-9 col-xl-8">
+
+      <!-- Profile Card -->
+      <div class="card-clean overflow-hidden mb-4">
+        <div class="profile-cover"></div>
+        <div class="px-3 px-md-4 pb-4">
+          <div class="d-flex align-items-end justify-content-between flex-wrap gap-2" style="margin-top:-40px;">
+            <div>
+              <% if (profileUser.image && profileUser.image.url) { %>
+                <img src="<%= profileUser.image.url %>" alt="avatar" class="profile-avatar" />
+              <% } else { %>
+                <div class="profile-avatar-placeholder"><%= profileUser.username.charAt(0).toUpperCase() %></div>
+              <% } %>
+            </div>
+            <div class="d-flex gap-2 flex-wrap pb-1">
+              <a href="#editProfile" data-bs-toggle="collapse" class="btn btn-sm btn-outline-ink px-3">
+                <i class="bi bi-pencil me-1"></i>Edit Profile
+              </a>
+              <% if (profileUser.resume && profileUser.resume.url) { %>
+                <a href="<%= profileUser.resume.url %>" target="_blank" class="btn btn-sm btn-ink px-3">
+                  <i class="bi bi-file-earmark-pdf me-1"></i>My Resume
+                </a>
+              <% } %>
+            </div>
+          </div>
+
+          <!-- Name & Role -->
+          <div class="mt-3">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <h2 class="font-syne fw-800 mb-0" style="letter-spacing:-0.5px;font-size:clamp(1.3rem,4vw,1.7rem);"><%= profileUser.username %></h2>
+              <span class="badge-type" style="background:rgba(13,13,20,0.08);color:var(--ink);">
+                <% if (profileUser.role==='employer') { %><i class="bi bi-person-workspace me-1"></i>Job Seeker
+                <% } else if (profileUser.role==='recruiter') { %><i class="bi bi-building me-1"></i>Recruiter
+                <% } else { %><i class="bi bi-shield-check me-1"></i>Admin<% } %>
+              </span>
+            </div>
+            <% if (profileUser.companyName) { %>
+              <p class="mb-1 mt-1" style="color:var(--text-muted);font-size:0.875rem;"><i class="bi bi-building me-1"></i><%= profileUser.companyName %></p>
+            <% } %>
+            <% if (profileUser.bio) { %>
+              <p class="mt-2 mb-0" style="font-size:0.9rem;color:var(--text);max-width:520px;"><%= profileUser.bio %></p>
+            <% } %>
+          </div>
+
+          <!-- Info Grid -->
+          <div class="profile-info-grid mt-3">
+            <div class="profile-info-item">
+              <div class="profile-info-label"><i class="bi bi-envelope me-1"></i>Email</div>
+              <div class="profile-info-value" style="font-size:0.83rem;"><%= profileUser.email %></div>
+            </div>
+            <div class="profile-info-item">
+              <div class="profile-info-label"><i class="bi bi-calendar3 me-1"></i>Member Since</div>
+              <div class="profile-info-value"><%= new Date(profileUser.createdAt).toLocaleDateString('en-US',{month:'long',year:'numeric'}) %></div>
+            </div>
+            <% if (profileUser.role==='employer') { %>
+              <div class="profile-info-item">
+                <div class="profile-info-label"><i class="bi bi-send me-1"></i>Applications</div>
+                <div class="profile-info-value"><%= profileUser.savedJobs ? profileUser.savedJobs.length : 0 %> saved jobs</div>
+              </div>
+            <% } %>
+            <% if (profileUser.role==='recruiter' && profileUser.companyName) { %>
+              <div class="profile-info-item">
+                <div class="profile-info-label"><i class="bi bi-building me-1"></i>Company</div>
+                <div class="profile-info-value"><%= profileUser.companyName %></div>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Edit Profile Form -->
+      <div class="collapse mb-4" id="editProfile">
+        <div class="card-clean p-3 p-md-4">
+          <h5 class="font-syne fw-700 mb-3"><i class="bi bi-pencil-square me-2 text-accent"></i>Edit Profile</h5>
+          <form action="/users/profile?_method=PUT" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label">Bio</label>
+                <textarea class="form-control" name="bio" rows="3" placeholder="Tell us about yourself..."><%= profileUser.bio||'' %></textarea>
+              </div>
+              <% if (profileUser.role==='recruiter') { %>
+                <div class="col-12">
+                  <label class="form-label">Company Name</label>
+                  <input type="text" class="form-control" name="companyName" value="<%= profileUser.companyName||'' %>" />
+                </div>
+              <% } %>
+              <div class="col-sm-6">
+                <label class="form-label">Profile Photo</label>
+                <div class="file-upload-zone" onclick="document.getElementById('imageInput').click()">
+                  <img id="imagePreview" src="" alt="" style="display:none;width:48px;height:48px;border-radius:50%;object-fit:cover;margin:0 auto 6px;" />
+                  <i class="bi bi-camera fs-4 d-block mb-1" style="color:var(--text-muted);"></i>
+                  <label id="imageLabel" class="file-upload-label" style="font-size:0.8rem;">Replace photo</label>
+                  <input type="file" id="imageInput" name="image" accept="image/*" />
+                </div>
+              </div>
+              <% if (profileUser.role==='employer') { %>
+                <div class="col-sm-6">
+                  <label class="form-label">Resume / CV</label>
+                  <div class="file-upload-zone" onclick="document.getElementById('resumeInput').click()">
+                    <i class="bi bi-file-earmark-arrow-up fs-4 d-block mb-1" style="color:var(--text-muted);"></i>
+                    <label id="resumeLabel" class="file-upload-label" style="font-size:0.8rem;">Upload new resume (PDF/DOC)</label>
+                    <input type="file" id="resumeInput" name="resume" accept=".pdf,.doc,.docx" />
+                  </div>
+                </div>
+              <% } %>
+            </div>
+            <div class="d-flex gap-2 mt-4 flex-wrap">
+              <button type="submit" class="btn btn-accent px-4"><i class="bi bi-check2 me-2"></i>Save Changes</button>
+              <a href="#editProfile" data-bs-toggle="collapse" class="btn-outline-ink px-4 py-2 d-inline-flex align-items-center">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Saved Jobs (Employer only) -->
+      <% if (profileUser.role==='employer' && profileUser.savedJobs && profileUser.savedJobs.length>0) { %>
+        <div class="card-clean p-3 p-md-4">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <h5 class="font-syne fw-700 mb-0"><i class="bi bi-bookmark-fill me-2 text-accent"></i>Saved Jobs (<%= profileUser.savedJobs.length %>)</h5>
+            <a href="/users/saved" class="btn btn-sm btn-outline-ink px-3">View All</a>
+          </div>
+          <div class="d-flex flex-column gap-2">
+            <% profileUser.savedJobs.slice(0,5).forEach(function(job){ %>
+              <div class="d-flex align-items-center justify-content-between p-3 rounded-3 flex-wrap gap-2" style="background:var(--surface);border:1px solid var(--border);">
+                <div style="min-width:0;">
+                  <a href="/jobs/<%= job._id %>" class="fw-700 text-decoration-none font-syne text-truncate d-block" style="color:var(--ink);font-size:0.9rem;max-width:280px;"><%= job.title %></a>
+                  <div style="font-size:0.75rem;color:var(--text-muted);"><%= job.companyName %></div>
+                </div>
+                <a href="/jobs/<%= job._id %>" class="btn btn-ink btn-sm px-3" style="font-size:0.78rem;flex-shrink:0;">View</a>
+              </div>
+            <% }) %>
+          </div>
+        </div>
+      <% } %>
+
+    </div>
+  </div>
+</div>
+</main>
+<%- include('../partials/footer') %>
+<%- include('../partials/scripts') %>

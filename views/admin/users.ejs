@@ -1,0 +1,114 @@
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/flash') %>
+<main class="main-content">
+<div class="page-hero">
+  <div class="container">
+    <p class="section-label text-white opacity-50 mb-1"><a href="/admin" class="text-white opacity-50 text-decoration-none">Admin</a> / Users</p>
+    <h1 class="text-white mb-0">Manage Users</h1>
+    <p class="lead mb-0"><%= users.length %> registered users</p>
+  </div>
+</div>
+<div class="container mt-4">
+
+  <div class="admin-sidebar">
+    <a href="/admin" class="admin-nav-link"><i class="bi bi-speedometer2"></i>Overview</a>
+    <a href="/admin/users" class="admin-nav-link active"><i class="bi bi-people"></i>Users</a>
+    <a href="/admin/jobs" class="admin-nav-link"><i class="bi bi-briefcase"></i>Jobs</a>
+  </div>
+
+  <!-- Search & Filter -->
+  <div class="card-clean p-3 mb-3">
+    <form action="/admin/users" method="GET" class="row g-2 align-items-end">
+      <div class="col-12 col-sm-6 col-md-5">
+        <label class="form-label" style="font-size:0.8rem;">Search Users</label>
+        <input type="text" class="form-control form-control-sm" name="search" value="<%= search %>" placeholder="Username or email..." />
+      </div>
+      <div class="col-6 col-sm-3 col-md-3">
+        <label class="form-label" style="font-size:0.8rem;">Role</label>
+        <select class="form-select form-select-sm" name="role">
+          <option value="all" <%= roleFilter==='all'?'selected':'' %>>All Roles</option>
+          <option value="employer" <%= roleFilter==='employer'?'selected':'' %>>Job Seeker</option>
+          <option value="recruiter" <%= roleFilter==='recruiter'?'selected':'' %>>Recruiter</option>
+          <option value="admin" <%= roleFilter==='admin'?'selected':'' %>>Admin</option>
+        </select>
+      </div>
+      <div class="col-6 col-sm-3 col-md-2">
+        <button type="submit" class="btn btn-ink w-100" style="padding:6px 12px;font-size:0.83rem;">Filter</button>
+      </div>
+      <% if (search || roleFilter!=='all') { %>
+        <div class="col-12 col-md-2">
+          <a href="/admin/users" class="btn btn-sm w-100" style="border:1.5px solid var(--border);border-radius:var(--radius);font-weight:600;font-size:0.8rem;padding:6px;">Clear</a>
+        </div>
+      <% } %>
+    </form>
+  </div>
+
+  <div class="card-clean overflow-hidden">
+    <div class="table-responsive-wrapper">
+      <table class="table applicants-table mb-0">
+        <thead>
+          <tr><th>User</th><th>Email</th><th>Role</th><th>Joined</th><th>Change Role</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          <% if (users.length===0) { %>
+            <tr><td colspan="6" class="text-center py-4 text-muted">No users found.</td></tr>
+          <% } %>
+          <% users.forEach(function(user){ %>
+            <tr>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <% if (user.image && user.image.url) { %>
+                    <img src="<%= user.image.url %>" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;" />
+                  <% } else { %>
+                    <div style="width:32px;height:32px;border-radius:50%;background:var(--ink);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.78rem;font-family:'Syne',sans-serif;flex-shrink:0;">
+                      <%= user.username.charAt(0).toUpperCase() %>
+                    </div>
+                  <% } %>
+                  <span class="fw-700 font-syne" style="font-size:0.875rem;"><%= user.username %></span>
+                </div>
+              </td>
+              <td style="font-size:0.8rem;color:var(--text-muted);"><%= user.email %></td>
+              <td>
+                <span class="badge-type" style="background:<%= user.role==='admin'?'rgba(124,58,237,0.1)':user.role==='recruiter'?'rgba(245,166,35,0.1)':'rgba(26,171,95,0.1)' %>;color:<%= user.role==='admin'?'#7c3aed':user.role==='recruiter'?'#b5780a':'var(--success)' %>;">
+                  <%= user.role.charAt(0).toUpperCase()+user.role.slice(1) %>
+                </span>
+              </td>
+              <td style="font-size:0.78rem;color:var(--text-muted);white-space:nowrap;"><%= new Date(user.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) %></td>
+              <td>
+                <% if (user._id.toString()!==currentUser._id.toString()) { %>
+                  <form action="/admin/users/<%= user._id %>/role?_method=PATCH" method="POST" class="d-flex gap-1">
+                    <select name="role" class="form-select form-select-sm" style="font-size:0.75rem;width:auto;border-radius:6px;min-width:90px;">
+                      <option value="employer" <%= user.role==='employer'?'selected':'' %>>Job Seeker</option>
+                      <option value="recruiter" <%= user.role==='recruiter'?'selected':'' %>>Recruiter</option>
+                      <option value="admin" <%= user.role==='admin'?'selected':'' %>>Admin</option>
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-ink" style="font-size:0.72rem;padding:3px 10px;"
+                      data-confirm="Change this user's role?">Save</button>
+                  </form>
+                <% } else { %>
+                  <span style="font-size:0.75rem;color:var(--text-muted);">You (Admin)</span>
+                <% } %>
+              </td>
+              <td>
+                <% if (user._id.toString()!==currentUser._id.toString()) { %>
+                  <form action="/admin/users/<%= user._id %>?_method=DELETE" method="POST" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-danger-outline" style="font-size:0.72rem;padding:3px 10px;"
+                      data-confirm="Delete user <%= user.username %> and all their data permanently?">
+                      <i class="bi bi-trash"></i> Delete
+                    </button>
+                  </form>
+                <% } else { %>
+                  <span style="font-size:0.75rem;color:var(--text-muted);">—</span>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</main>
+<%- include('../partials/footer') %>
+<%- include('../partials/scripts') %>

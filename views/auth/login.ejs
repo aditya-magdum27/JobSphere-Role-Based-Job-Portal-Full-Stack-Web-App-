@@ -1,0 +1,47 @@
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/flash') %>
+<main class="main-content">
+<div class="auth-page">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-sm-9 col-md-7 col-lg-5 col-xl-4">
+        <div class="text-center mb-4">
+          <a href="/" class="text-decoration-none d-inline-flex align-items-center gap-2">
+            <i class="bi bi-sphere text-accent" style="font-size:1.8rem;"></i>
+            <span class="font-syne fw-800 fs-3" style="color:var(--ink);">Job<span class="text-accent">Sphere</span></span>
+          </a>
+        </div>
+        <div class="auth-card">
+          <div class="mb-4">
+            <h1 class="auth-title">Welcome back</h1>
+            <p class="auth-subtitle">Sign in to your account</p>
+          </div>
+          <form action="/login" method="POST" class="needs-validation" novalidate>
+            <div class="mb-3">
+              <label for="username" class="form-label">Username</label>
+              <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required autocomplete="username" />
+              <div class="invalid-feedback">Please enter your username.</div>
+            </div>
+            <div class="mb-4">
+              <label for="password" class="form-label">Password</label>
+              <div class="position-relative">
+                <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required autocomplete="current-password" />
+                <button type="button" class="btn btn-sm position-absolute end-0 top-50 translate-middle-y me-2 border-0 text-muted" onclick="togglePass('password',this)"><i class="bi bi-eye"></i></button>
+              </div>
+              <div class="invalid-feedback">Please enter your password.</div>
+            </div>
+            <button type="submit" class="btn btn-ink w-100 py-3 justify-content-center">
+              <i class="bi bi-arrow-right-short fs-5"></i>Sign In
+            </button>
+          </form>
+          <div class="auth-divider"><span>New to JobSphere?</span></div>
+          <a href="/register" class="btn-outline-ink w-100 py-3 justify-content-center d-flex">Create an Account</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</main>
+<%- include('../partials/footer') %>
+<%- include('../partials/scripts') %>

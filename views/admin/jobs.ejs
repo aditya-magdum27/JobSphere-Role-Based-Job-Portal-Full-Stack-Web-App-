@@ -1,0 +1,84 @@
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/flash') %>
+<main class="main-content">
+<div class="page-hero">
+  <div class="container">
+    <p class="section-label mb-1" style="color:rgba(255,255,255,0.5);"><a href="/admin" class="text-white opacity-50 text-decoration-none">Admin</a> / Jobs</p>
+    <h1 class="text-white mb-0">Manage Jobs</h1>
+    <p class="lead mb-0"><%= jobs.length %> total listings</p>
+  </div>
+</div>
+<div class="container mt-4">
+
+  <!-- Admin nav -->
+  <div class="admin-sidebar">
+    <a href="/admin" class="admin-nav-link"><i class="bi bi-speedometer2"></i>Overview</a>
+    <a href="/admin/users" class="admin-nav-link"><i class="bi bi-people"></i>Users</a>
+    <a href="/admin/jobs" class="admin-nav-link active"><i class="bi bi-briefcase"></i>Jobs</a>
+  </div>
+
+  <!-- Search -->
+  <div class="card-clean p-3 mb-4">
+    <form action="/admin/jobs" method="GET" class="row g-2 align-items-end">
+      <div class="col-12 col-sm-8 col-md-6">
+        <label class="form-label">Search Jobs</label>
+        <input type="text" class="form-control" name="search" value="<%= search %>" placeholder="Title or company..." />
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-ink"><i class="bi bi-search me-1"></i>Search</button>
+      </div>
+      <% if (search) { %>
+        <div class="col-auto"><a href="/admin/jobs" class="btn-outline-ink px-3 py-2 d-inline-flex" style="font-size:0.83rem;">Clear</a></div>
+      <% } %>
+    </form>
+  </div>
+
+  <div class="card-clean overflow-hidden">
+    <div class="table-responsive-wrapper">
+      <table class="applicants-table">
+        <thead>
+          <tr><th>Job Title</th><th>Company</th><th>Posted By</th><th>Type</th><th>Applicants</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          <% jobs.forEach(function(job){ %>
+            <%
+              var tcMap={'Full-Time':'badge-full-time','Internship':'badge-internship','Part-Time':'badge-part-time','Contract':'badge-contract','Remote':'badge-remote'};
+              var tc=tcMap[job.type]||'badge-full-time';
+            %>
+            <tr>
+              <td><a href="/jobs/<%= job._id %>" class="fw-600 font-syne text-decoration-none" style="color:var(--ink);font-size:0.875rem;"><%= job.title %></a></td>
+              <td style="font-size:0.83rem;"><%= job.companyName %></td>
+              <td style="font-size:0.78rem;color:var(--text-muted);"><%= job.postedBy?job.postedBy.username:'Unknown' %></td>
+              <td><span class="badge-type <%= tc %>"><%= job.type %></span></td>
+              <td><strong><%= job.applications.length %></strong></td>
+              <td><span class="badge-type" style="background:<%= job.isActive?'rgba(26,171,95,0.1)':'rgba(229,62,62,0.1)' %>;color:<%= job.isActive?'var(--success)':'var(--danger)' %>;"><%= job.isActive?'Active':'Closed' %></span></td>
+              <td>
+                <div class="d-flex gap-1 flex-wrap">
+                  <a href="/jobs/<%= job._id %>/edit" class="btn btn-sm btn-ink" style="font-size:0.72rem;padding:3px 9px;">Edit</a>
+                  <form action="/admin/jobs/<%= job._id %>/toggle" method="POST" style="display:inline;">
+                    <button type="submit" class="btn btn-sm" style="border:1.5px solid var(--ink);color:var(--ink);border-radius:6px;font-size:0.72rem;padding:3px 9px;font-weight:700;cursor:pointer;">
+                      <%= job.isActive?'Deactivate':'Activate' %>
+                    </button>
+                  </form>
+                  <form action="/admin/jobs/<%= job._id %>?_method=DELETE" method="POST" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-danger-outline" style="font-size:0.72rem;padding:3px 9px;"
+                      data-confirm="Permanently delete this job listing?">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+    <% if (jobs.length===0) { %>
+      <div class="empty-state"><div class="empty-state-icon"><i class="bi bi-briefcase"></i></div><h4>No jobs found</h4><p>Try a different search.</p></div>
+    <% } %>
+  </div>
+</div>
+</main>
+<%- include('../partials/footer') %>
+<%- include('../partials/scripts') %>

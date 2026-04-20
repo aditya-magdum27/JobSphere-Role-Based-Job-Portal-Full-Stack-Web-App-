@@ -1,0 +1,66 @@
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/flash') %>
+<main class="main-content">
+<div class="page-hero">
+  <div class="container">
+    <p class="section-label text-white opacity-50 mb-1">My Collection</p>
+    <h1 class="text-white">Saved Jobs</h1>
+    <p class="lead"><%= savedJobs.length %> job<%= savedJobs.length!==1?'s':'' %> saved</p>
+  </div>
+</div>
+<div class="container mt-4">
+  <% if (savedJobs.length===0) { %>
+    <div class="card-clean">
+      <div class="empty-state">
+        <div class="empty-state-icon"><i class="bi bi-bookmark"></i></div>
+        <h4>No saved jobs yet</h4>
+        <p>Browse jobs and click "Save Job" to keep track of opportunities.</p>
+        <a href="/jobs" class="btn btn-accent mt-2">Browse Jobs</a>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="row g-3 g-md-4">
+      <% savedJobs.forEach(function(job){ %>
+        <div class="col-12 col-md-6 col-xl-4">
+          <div class="job-card" data-href="/jobs/<%= job._id %>">
+            <div class="d-flex align-items-center gap-3">
+              <% if (job.logo && job.logo.url) { %>
+                <img src="<%= job.logo.url %>" alt="<%= job.companyName %>" class="job-logo" />
+              <% } else { %>
+                <div class="job-logo-placeholder"><%= job.companyName.charAt(0).toUpperCase() %></div>
+              <% } %>
+              <div style="min-width:0;flex:1;">
+                <div class="job-company text-truncate"><%= job.companyName %></div>
+                <div style="font-size:0.75rem;color:var(--text-muted);" class="text-truncate"><i class="bi bi-geo-alt me-1"></i><%= job.location||'Remote' %></div>
+              </div>
+              <form action="/jobs/<%= job._id %>/save" method="POST" style="flex-shrink:0;">
+                <button type="submit" class="btn btn-sm border-0 p-1" style="color:var(--accent);background:none;" title="Remove from saved">
+                  <i class="bi bi-bookmark-fill fs-5"></i>
+                </button>
+              </form>
+            </div>
+            <a href="/jobs/<%= job._id %>" class="job-card-title text-truncate"><%= job.title %></a>
+            <div class="job-meta">
+              <%
+                var tcMap={'Full-Time':'badge-full-time','Internship':'badge-internship','Part-Time':'badge-part-time','Contract':'badge-contract','Remote':'badge-remote'};
+                var typeClass=tcMap[job.type]||'badge-full-time';
+              %>
+              <span class="badge-type <%= typeClass %>"><%= job.type %></span>
+              <% if (job.salary && job.salary!=='Not disclosed') { %>
+                <span class="job-info-chip"><i class="bi bi-cash-stack"></i><%= job.salary %></span>
+              <% } %>
+            </div>
+            <div class="job-card-footer">
+              <span class="job-date"><i class="bi bi-clock me-1"></i><%= new Date(job.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}) %></span>
+              <a href="/jobs/<%= job._id %>" class="btn btn-accent btn-sm px-3" style="font-size:0.78rem;">Apply</a>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+</main>
+<%- include('../partials/footer') %>
+<%- include('../partials/scripts') %>

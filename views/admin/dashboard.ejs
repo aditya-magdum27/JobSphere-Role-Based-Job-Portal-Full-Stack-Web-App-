@@ -1,0 +1,118 @@
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/flash') %>
+<main class="main-content">
+<div class="page-hero">
+  <div class="container">
+    <p class="section-label text-white opacity-50 mb-1">System Overview</p>
+    <h1 class="text-white"><i class="bi bi-shield-check me-2" style="color:var(--accent);"></i>Admin Panel</h1>
+    <p class="lead">Full control over JobSphere platform</p>
+  </div>
+</div>
+<div class="container mt-4">
+
+  <!-- Admin Nav -->
+  <div class="admin-sidebar">
+    <a href="/admin" class="admin-nav-link active"><i class="bi bi-speedometer2"></i>Overview</a>
+    <a href="/admin/users" class="admin-nav-link"><i class="bi bi-people"></i>Users</a>
+    <a href="/admin/jobs" class="admin-nav-link"><i class="bi bi-briefcase"></i>Jobs</a>
+    <a href="/jobs/new" class="admin-nav-link"><i class="bi bi-plus-circle"></i>Post Job</a>
+    <a href="/jobs" class="admin-nav-link"><i class="bi bi-globe"></i>View Site</a>
+  </div>
+
+  <!-- Stats -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+      <div class="admin-stat-card">
+        <div class="mb-2" style="font-size:1.8rem;">👥</div>
+        <div class="admin-stat-number"><%= stats.totalUsers %></div>
+        <div class="stat-label mt-1">Total Users</div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="admin-stat-card">
+        <div class="mb-2" style="font-size:1.8rem;">💼</div>
+        <div class="admin-stat-number"><%= stats.totalJobs %></div>
+        <div class="stat-label mt-1">Total Jobs</div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="admin-stat-card">
+        <div class="mb-2" style="font-size:1.8rem;">🔍</div>
+        <div class="admin-stat-number"><%= stats.totalEmployers %></div>
+        <div class="stat-label mt-1">Job Seekers</div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="admin-stat-card">
+        <div class="mb-2" style="font-size:1.8rem;">📨</div>
+        <div class="admin-stat-number"><%= stats.totalApplications %></div>
+        <div class="stat-label mt-1">Applications</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="row g-4">
+    <div class="col-lg-6">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h4 class="font-syne fw-700 mb-0">Recent Jobs</h4>
+        <a href="/admin/jobs" class="btn btn-sm btn-outline-ink px-3">Manage All</a>
+      </div>
+      <div class="card-clean overflow-hidden">
+        <% if (recentJobs.length===0) { %>
+          <div class="p-4 text-muted text-center" style="font-size:0.875rem;">No jobs yet.</div>
+        <% } %>
+        <% recentJobs.forEach(function(job,i){ %>
+          <div class="d-flex align-items-center justify-content-between p-3 <%= i<recentJobs.length-1?'border-bottom':'' %> flex-wrap gap-2">
+            <div style="min-width:0;">
+              <div class="fw-700 font-syne text-truncate" style="font-size:0.875rem;max-width:200px;"><%= job.title %></div>
+              <div style="font-size:0.75rem;color:var(--text-muted);"><%= job.companyName %> · by <%= job.postedBy?job.postedBy.username:'Unknown' %></div>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-shrink-0">
+              <% if (job.isActive) { %>
+                <span class="badge-type" style="background:rgba(26,171,95,0.1);color:var(--success);">Active</span>
+              <% } else { %>
+                <span class="badge-type" style="background:rgba(229,62,62,0.1);color:var(--danger);">Closed</span>
+              <% } %>
+              <a href="/jobs/<%= job._id %>" class="btn btn-sm btn-ink" style="font-size:0.72rem;padding:3px 10px;">View</a>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h4 class="font-syne fw-700 mb-0">Recent Users</h4>
+        <a href="/admin/users" class="btn btn-sm btn-outline-ink px-3">Manage All</a>
+      </div>
+      <div class="card-clean overflow-hidden">
+        <% if (recentUsers.length===0) { %>
+          <div class="p-4 text-muted text-center" style="font-size:0.875rem;">No users yet.</div>
+        <% } %>
+        <% recentUsers.forEach(function(user,i){ %>
+          <div class="d-flex align-items-center justify-content-between p-3 <%= i<recentUsers.length-1?'border-bottom':'' %> flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+              <% if (user.image && user.image.url) { %>
+                <img src="<%= user.image.url %>" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;" />
+              <% } else { %>
+                <div style="width:32px;height:32px;border-radius:50%;background:var(--ink);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.78rem;font-family:'Syne',sans-serif;flex-shrink:0;">
+                  <%= user.username.charAt(0).toUpperCase() %>
+                </div>
+              <% } %>
+              <div style="min-width:0;">
+                <div class="fw-700 font-syne" style="font-size:0.875rem;"><%= user.username %></div>
+                <div class="text-truncate" style="font-size:0.72rem;color:var(--text-muted);max-width:160px;"><%= user.email %></div>
+              </div>
+            </div>
+            <span class="badge-type flex-shrink-0" style="background:rgba(13,13,20,0.08);color:var(--ink);"><%= user.role %></span>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  </div>
+</div>
+</main>
+<%- include('../partials/footer') %>
+<%- include('../partials/scripts') %>

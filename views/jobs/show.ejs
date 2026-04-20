@@ -1,0 +1,226 @@
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/flash') %>
+<main class="main-content">
+<div class="container mt-3">
+  <a href="/jobs" class="text-decoration-none text-muted d-inline-flex align-items-center gap-1 mb-3" style="font-size:0.875rem;">
+    <i class="bi bi-arrow-left"></i>Back to Jobs
+  </a>
+
+  <div class="row g-4">
+    <!-- Main -->
+    <div class="col-lg-8">
+      <div class="job-show-hero">
+        <div class="d-flex align-items-start gap-3 flex-wrap">
+          <% if (job.logo && job.logo.url) { %>
+            <img src="<%= job.logo.url %>" alt="<%= job.companyName %>" class="job-logo-large" />
+          <% } else { %>
+            <div class="job-logo-placeholder-lg"><%= job.companyName.charAt(0).toUpperCase() %></div>
+          <% } %>
+          <div class="flex-grow-1" style="min-width:0;">
+            <div class="d-flex flex-wrap gap-2 mb-2">
+              <%
+                var tcMap={'Full-Time':'badge-full-time','Internship':'badge-internship','Part-Time':'badge-part-time','Contract':'badge-contract','Remote':'badge-remote'};
+                var typeClass=tcMap[job.type]||'badge-full-time';
+              %>
+              <span class="badge-type <%= typeClass %>"><%= job.type %></span>
+              <% if (!job.isActive) { %><span class="badge-type" style="background:rgba(229,62,62,0.1);color:var(--danger);">Closed</span><% } %>
+            </div>
+            <h1 class="job-title-large"><%= job.title %></h1>
+            <div class="d-flex align-items-center gap-1 mt-1" style="color:var(--text-muted);font-size:0.875rem;">
+              <i class="bi bi-building"></i>
+              <strong><%= job.companyName %></strong>
+              <% if (job.postedBy && job.postedBy.username) { %>&nbsp;·&nbsp;by <%= job.postedBy.username %><% } %>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          <% if (job.location) { %><span class="job-info-chip"><i class="bi bi-geo-alt"></i><%= job.location %></span><% } %>
+          <% if (job.salary) { %><span class="job-info-chip"><i class="bi bi-cash-stack"></i><%= job.salary %></span><% } %>
+          <% if (job.experience) { %><span class="job-info-chip"><i class="bi bi-bar-chart"></i><%= job.experience %> exp</span><% } %>
+          <span class="job-info-chip"><i class="bi bi-people"></i><%= job.applications.length %> applicant<%= job.applications.length!==1?'s':'' %></span>
+          <span class="job-info-chip"><i class="bi bi-calendar3"></i>Posted <%= new Date(job.createdAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) %></span>
+        </div>
+
+        <% if (job.skills) { %>
+          <div class="mt-3">
+            <p class="section-label mb-2">Skills & Keywords</p>
+            <div class="d-flex flex-wrap gap-2">
+              <% job.skills.split(',').filter(function(s){return s.trim();}).forEach(function(skill){ %>
+                <span class="skill-tag"><%= skill.trim() %></span>
+              <% }) %>
+            </div>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Description -->
+      <div class="mb-4">
+        <p class="section-label mb-2">Job Description</p>
+        <div class="job-description-content"><%= job.description %></div>
+      </div>
+
+      <!-- Applicants table — recruiter/admin -->
+      <% if (currentUser && (currentUser.role==='recruiter'||currentUser.role==='admin') && job.applications.length>0) { %>
+        <div class="card-clean mb-4">
+          <div class="p-3 border-bottom d-flex align-items-center justify-content-between">
+            <h5 class="font-syne fw-700 mb-0">Applicants <span class="badge bg-dark rounded-pill ms-2"><%= job.applications.length %></span></h5>
+          </div>
+          <div class="table-responsive-wrapper">
+            <table class="table applicants-table mb-0">
+              <thead><tr><th>Applicant</th><th>Applied</th><th>Status</th><th>Resume</th><th>Update</th></tr></thead>
+              <tbody>
+                <% job.applications.forEach(function(app){ %>
+                  <% if (app.applicant) { %>
+                    <tr>
+                      <td>
+                        <div class="d-flex align-items-center gap-2">
+                          <% if (app.applicant.image && app.applicant.image.url) { %>
+                            <img src="<%= app.applicant.image.url %>" style="width:30px;height:30px;border-radius:50%;object-fit:cover;flex-shrink:0;" />
+                          <% } else { %>
+                            <div style="width:30px;height:30px;border-radius:50%;background:var(--ink);color:white;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.75rem;font-family:'Syne',sans-serif;flex-shrink:0;">
+                              <%= app.applicant.username?app.applicant.username.charAt(0).toUpperCase():'?' %>
+                            </div>
+                          <% } %>
+                          <div style="min-width:0;">
+                            <div class="fw-600" style="font-size:0.83rem;"><%= app.applicant.username %></div>
+                            <div class="text-truncate" style="font-size:0.72rem;color:var(--text-muted);max-width:140px;"><%= app.applicant.email %></div>
+                          </div>
+                        </div>
+                      </td>
+                      <td style="font-size:0.78rem;color:var(--text-muted);white-space:nowrap;"><%= new Date(app.appliedAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}) %></td>
+                      <td><span class="badge-type badge-status-<%= app.status %>"><%= app.status %></span></td>
+                      <td>
+                        <% if (app.applicant.resume && app.applicant.resume.url) { %>
+                          <a href="<%= app.applicant.resume.url %>" target="_blank" class="btn btn-sm" style="background:var(--surface);border:1px solid var(--border);border-radius:6px;font-size:0.72rem;padding:3px 10px;color:var(--text);font-weight:600;">
+                            <i class="bi bi-file-earmark-pdf me-1 text-danger"></i>View
+                          </a>
+                        <% } else { %>
+                          <span style="font-size:0.75rem;color:var(--text-muted);">N/A</span>
+                        <% } %>
+                      </td>
+                      <td>
+                        <form action="/jobs/<%= job._id %>/applications/<%= app._id %>/status" method="POST" class="d-flex gap-1">
+                          <select name="status" class="form-select form-select-sm" style="font-size:0.75rem;width:auto;border-radius:6px;min-width:100px;">
+                            <option value="pending" <%= app.status==='pending'?'selected':'' %>>Pending</option>
+                            <option value="reviewed" <%= app.status==='reviewed'?'selected':'' %>>Reviewed</option>
+                            <option value="shortlisted" <%= app.status==='shortlisted'?'selected':'' %>>Shortlisted</option>
+                            <option value="rejected" <%= app.status==='rejected'?'selected':'' %>>Rejected</option>
+                          </select>
+                          <button type="submit" class="btn btn-sm btn-ink" style="font-size:0.72rem;padding:3px 10px;">Save</button>
+                        </form>
+                      </td>
+                    </tr>
+                  <% } %>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+      <!-- Action Card -->
+      <div class="card-clean p-4 mb-3" style="position:sticky;top:calc(var(--nav-height)+1rem);">
+
+        <% if (!currentUser) { %>
+          <p class="text-muted mb-3" style="font-size:0.875rem;">Sign in to apply or save this job.</p>
+          <a href="/login" class="btn btn-accent w-100 mb-2 justify-content-center"><i class="bi bi-box-arrow-in-right me-2"></i>Login to Apply</a>
+          <a href="/register" class="btn-outline-ink w-100 py-2 justify-content-center d-flex">Create Account</a>
+
+        <% } else if (currentUser.role==='employer') { %>
+
+          <!-- Application status for this user -->
+          <% if (myApplication) { %>
+            <div class="p-3 rounded-3 mb-3 d-flex align-items-center gap-2" style="background:var(--surface);border:1px solid var(--border);">
+              <i class="bi bi-send-check text-accent" style="font-size:1.2rem;"></i>
+              <div>
+                <div class="fw-700 font-syne" style="font-size:0.85rem;">Application Submitted</div>
+                <div style="font-size:0.75rem;color:var(--text-muted);">Status: <span class="badge-type badge-status-<%= myApplication.status %>" style="font-size:0.65rem;"><%= myApplication.status %></span></div>
+              </div>
+            </div>
+          <% } %>
+
+          <% if (!job.isActive) { %>
+            <div class="alert alert-warning rounded-3 mb-3" style="font-size:0.83rem;"><i class="bi bi-exclamation-circle me-2"></i>This job is no longer accepting applications.</div>
+          <% } else if (!myApplication) { %>
+            <form action="/jobs/<%= job._id %>/apply" method="POST" class="mb-2">
+              <button type="submit" class="btn btn-accent w-100 py-3 justify-content-center"><i class="bi bi-send me-2"></i>Apply Now</button>
+            </form>
+          <% } else { %>
+            <!-- Cancel application -->
+            <form action="/jobs/<%= job._id %>/apply?_method=DELETE" method="POST" class="mb-2">
+              <button type="submit" class="btn btn-danger-outline w-100 py-2 justify-content-center"
+                data-confirm="Withdraw your application for this job?">
+                <i class="bi bi-x-circle me-2"></i>Withdraw Application
+              </button>
+            </form>
+          <% } %>
+
+          <form action="/jobs/<%= job._id %>/save" method="POST">
+            <button type="submit" class="btn w-100 py-2 justify-content-center <%= hasSaved?'btn-ink':'btn-outline-ink' %>">
+              <i class="bi bi-bookmark<%= hasSaved?'-fill':'' %> me-2"></i><%= hasSaved?'Job Saved':'Save Job' %>
+            </button>
+          </form>
+
+        <% } else if (currentUser.role==='recruiter'||currentUser.role==='admin') { %>
+          <% if (job.postedBy && (job.postedBy._id.equals(currentUser._id)||currentUser.role==='admin')) { %>
+            <p class="section-label mb-3">Manage This Job</p>
+            <a href="/jobs/<%= job._id %>/edit" class="btn btn-ink w-100 mb-2 justify-content-center"><i class="bi bi-pencil me-2"></i>Edit Job</a>
+            <form action="/jobs/<%= job._id %>?_method=DELETE" method="POST">
+              <button type="submit" class="btn btn-danger-outline w-100 justify-content-center" data-confirm="Delete this job permanently?">
+                <i class="bi bi-trash me-2"></i>Delete Job
+              </button>
+            </form>
+          <% } else { %>
+            <p class="text-muted" style="font-size:0.875rem;">Recruiters cannot apply to jobs.</p>
+          <% } %>
+        <% } %>
+
+        <!-- Quick Stats -->
+        <div class="mt-4 pt-3 border-top">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span style="font-size:0.78rem;color:var(--text-muted);">Applications</span>
+            <strong style="font-size:0.875rem;"><%= job.applications.length %></strong>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span style="font-size:0.78rem;color:var(--text-muted);">Job Type</span>
+            <strong style="font-size:0.875rem;"><%= job.type %></strong>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <span style="font-size:0.78rem;color:var(--text-muted);">Posted</span>
+            <strong style="font-size:0.875rem;"><%= new Date(job.createdAt).toLocaleDateString() %></strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Posted By -->
+      <% if (job.postedBy) { %>
+        <div class="card-clean p-4">
+          <p class="section-label mb-3">Posted By</p>
+          <div class="d-flex align-items-center gap-3">
+            <% if (job.postedBy.image && job.postedBy.image.url) { %>
+              <img src="<%= job.postedBy.image.url %>" style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0;" />
+            <% } else { %>
+              <div style="width:42px;height:42px;border-radius:50%;background:var(--ink);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1rem;font-family:'Syne',sans-serif;flex-shrink:0;">
+                <%= job.postedBy.username.charAt(0).toUpperCase() %>
+              </div>
+            <% } %>
+            <div>
+              <div class="fw-700 font-syne" style="font-size:0.9rem;"><%= job.postedBy.username %></div>
+              <% if (job.postedBy.companyName) { %>
+                <div style="font-size:0.78rem;color:var(--text-muted);"><%= job.postedBy.companyName %></div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
+</main>
+<%- include('../partials/footer') %>
+<%- include('../partials/scripts') %>

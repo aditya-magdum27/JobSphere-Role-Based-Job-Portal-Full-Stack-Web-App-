@@ -1,0 +1,121 @@
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/flash') %>
+<main class="main-content">
+<div class="auth-page py-4">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+        <div class="text-center mb-4">
+          <a href="/" class="text-decoration-none d-inline-flex align-items-center gap-2">
+            <i class="bi bi-sphere text-accent" style="font-size:1.8rem;"></i>
+            <span class="font-syne fw-800 fs-3" style="color:var(--ink);">Job<span class="text-accent">Sphere</span></span>
+          </a>
+        </div>
+        <div class="auth-card">
+          <div class="mb-4">
+            <h1 class="auth-title">Create Account</h1>
+            <p class="auth-subtitle">Join thousands finding their next opportunity</p>
+          </div>
+          <form action="/register" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+            <!-- Role Selection -->
+            <div class="mb-4">
+              <label class="form-label">I am a...</label>
+              <div class="row g-2">
+                <div class="col-6">
+                  <input type="radio" class="btn-check" name="roleRadio" id="roleEmployer" value="employer" checked>
+                  <label class="btn w-100 text-start" for="roleEmployer" style="border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;">
+                    <i class="bi bi-person-workspace me-2 text-accent"></i>
+                    <strong style="font-size:0.9rem;">Job Seeker</strong><br>
+                    <small class="text-muted" style="font-size:0.75rem;">Browse &amp; apply to jobs</small>
+                  </label>
+                </div>
+                <div class="col-6">
+                  <input type="radio" class="btn-check" name="roleRadio" id="roleRecruiter" value="recruiter">
+                  <label class="btn w-100 text-start" for="roleRecruiter" style="border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;">
+                    <i class="bi bi-building me-2 text-accent"></i>
+                    <strong style="font-size:0.9rem;">Recruiter</strong><br>
+                    <small class="text-muted" style="font-size:0.75rem;">Post jobs &amp; hire</small>
+                  </label>
+                </div>
+              </div>
+              <select name="role" id="roleSelect" class="d-none">
+                <option value="employer" selected>employer</option>
+                <option value="recruiter">recruiter</option>
+              </select>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-12">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username" placeholder="Choose a username" required />
+                <div class="invalid-feedback">Username is required.</div>
+              </div>
+              <div class="col-12">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="your@email.com" required />
+                <div class="invalid-feedback">A valid email is required.</div>
+              </div>
+              <div class="col-12">
+                <label for="regPassword" class="form-label">Password</label>
+                <div class="position-relative">
+                  <input type="password" class="form-control" id="regPassword" name="password" placeholder="Min. 6 characters" required minlength="6" autocomplete="new-password" />
+                  <button type="button" class="btn btn-sm position-absolute end-0 top-50 translate-middle-y me-2 border-0 text-muted" onclick="togglePass('regPassword',this)"><i class="bi bi-eye"></i></button>
+                </div>
+                <div class="invalid-feedback">Password must be at least 6 characters.</div>
+              </div>
+
+              <!-- Recruiter only -->
+              <div class="col-12 conditional-field" id="recruiterFields">
+                <label for="companyName" class="form-label">Company Name <span class="text-accent">*</span></label>
+                <input type="text" class="form-control" id="companyName" name="companyName" placeholder="Your company name" />
+                <div class="form-text">Required for recruiter accounts.</div>
+              </div>
+
+              <div class="col-12">
+                <label for="bio" class="form-label">Bio <span class="text-muted fw-normal">(optional)</span></label>
+                <textarea class="form-control" id="bio" name="bio" rows="2" placeholder="Tell us about yourself..."></textarea>
+              </div>
+
+              <div class="col-12">
+                <label class="form-label">Profile Photo <span class="text-muted fw-normal">(optional)</span></label>
+                <div class="file-upload-zone" onclick="document.getElementById('imageInput').click()">
+                  <img id="imagePreview" src="" alt="" style="display:none;width:56px;height:56px;border-radius:50%;object-fit:cover;margin:0 auto 8px;" />
+                  <i class="bi bi-camera fs-3 d-block mb-1" style="color:var(--text-muted);"></i>
+                  <label id="imageLabel" class="file-upload-label">Click to upload photo</label>
+                  <input type="file" id="imageInput" name="image" accept="image/*" />
+                </div>
+              </div>
+
+              <div class="col-12 conditional-field" id="employerFields">
+                <label class="form-label">Resume <span class="text-muted fw-normal">(optional)</span></label>
+                <div class="file-upload-zone" onclick="document.getElementById('resumeInput').click()">
+                  <i class="bi bi-file-earmark-pdf fs-3 d-block mb-1" style="color:var(--text-muted);"></i>
+                  <label id="resumeLabel" class="file-upload-label">Upload PDF or DOC (max 5MB)</label>
+                  <input type="file" id="resumeInput" name="resume" accept=".pdf,.doc,.docx" />
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-ink w-100 py-3 mt-4 justify-content-center">
+              <i class="bi bi-person-plus me-2"></i>Create Account
+            </button>
+          </form>
+          <div class="auth-divider"><span>Already have an account?</span></div>
+          <a href="/login" class="btn-outline-ink w-100 py-3 justify-content-center d-flex">Sign In</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</main>
+<%- include('../partials/footer') %>
+<%- include('../partials/scripts') %>
+<script>
+document.querySelectorAll('input[name="roleRadio"]').forEach(function(r) {
+  r.addEventListener('change', function() {
+    document.getElementById('roleSelect').value = this.value;
+    document.getElementById('roleSelect').dispatchEvent(new Event('change'));
+  });
+});
+</script>

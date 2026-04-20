@@ -1,0 +1,113 @@
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top" id="mainNav">
+  <div class="container">
+    <!-- Logo — always top-left -->
+    <a class="navbar-brand" href="/">
+      <span class="brand-icon"><i class="bi bi-sphere"></i></span>
+      Job<span class="brand-accent">Sphere</span>
+    </a>
+
+    <!-- Mobile toggle -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Toggle navigation">
+      <i class="bi bi-list" style="font-size:1.4rem;"></i>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <!-- Search bar -->
+      <form class="search-form" action="/jobs" method="GET">
+        <div class="search-wrapper">
+          <i class="bi bi-search search-icon"></i>
+          <input class="form-control search-input" type="search" name="search"
+            placeholder="Search jobs, companies..."
+            value="<%= typeof search !== 'undefined' ? search : '' %>" />
+          <button class="btn-search" type="submit">Search</button>
+        </div>
+      </form>
+
+      <!-- Nav links -->
+      <ul class="navbar-nav ms-auto align-items-center">
+        <% if (!currentUser) { %>
+          <li class="nav-item"><a class="nav-link" href="/login"><i class="bi bi-box-arrow-in-right me-1"></i>Login</a></li>
+          <li class="nav-item ms-1"><a class="btn-primary-custom" href="/register"><i class="bi bi-person-plus me-1"></i>Register</a></li>
+
+        <% } else if (currentUser.role === 'employer') { %>
+          <li class="nav-item"><a class="nav-link" href="/jobs"><i class="bi bi-briefcase me-1"></i>Jobs</a></li>
+          <li class="nav-item"><a class="nav-link" href="/users/dashboard"><i class="bi bi-grid me-1"></i>Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="/users/saved"><i class="bi bi-bookmark me-1"></i>Saved</a></li>
+          <li class="nav-item dropdown ms-1">
+            <a class="nav-link dropdown-toggle user-avatar-nav d-flex align-items-center gap-1" href="#" data-bs-toggle="dropdown">
+              <% if (currentUser.image && currentUser.image.url) { %>
+                <img src="<%= currentUser.image.url %>" class="avatar-sm" alt="avatar" />
+              <% } else { %>
+                <span class="avatar-initials"><%= currentUser.username.charAt(0).toUpperCase() %></span>
+              <% } %>
+              <span class="d-none d-lg-inline" style="font-size:0.82rem;color:rgba(255,255,255,0.7);"><%= currentUser.username %></span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end custom-dropdown">
+              <li><span class="dropdown-item-text fw-semibold"><%= currentUser.username %></span></li>
+              <li><small class="dropdown-item-text text-muted">Job Seeker</small></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="/users/profile"><i class="bi bi-person me-2"></i>My Profile</a></li>
+              <li><a class="dropdown-item" href="/users/dashboard"><i class="bi bi-grid me-2"></i>Dashboard</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <form action="/logout" method="POST">
+                  <button class="dropdown-item text-danger" type="submit"><i class="bi bi-box-arrow-right me-2"></i>Logout</button>
+                </form>
+              </li>
+            </ul>
+          </li>
+
+        <% } else if (currentUser.role === 'recruiter') { %>
+          <li class="nav-item"><a class="nav-link" href="/jobs"><i class="bi bi-briefcase me-1"></i>Jobs</a></li>
+          <li class="nav-item"><a class="nav-link" href="/users/dashboard"><i class="bi bi-grid me-1"></i>Dashboard</a></li>
+          <li class="nav-item ms-1"><a class="btn-primary-custom" href="/jobs/new"><i class="bi bi-plus-lg me-1"></i>Post Job</a></li>
+          <li class="nav-item dropdown ms-1">
+            <a class="nav-link dropdown-toggle user-avatar-nav d-flex align-items-center gap-1" href="#" data-bs-toggle="dropdown">
+              <% if (currentUser.image && currentUser.image.url) { %>
+                <img src="<%= currentUser.image.url %>" class="avatar-sm" alt="avatar" />
+              <% } else { %>
+                <span class="avatar-initials"><%= currentUser.username.charAt(0).toUpperCase() %></span>
+              <% } %>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end custom-dropdown">
+              <li><span class="dropdown-item-text fw-semibold"><%= currentUser.username %></span></li>
+              <li><small class="dropdown-item-text text-muted"><%= currentUser.companyName || 'Recruiter' %></small></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="/users/profile"><i class="bi bi-person me-2"></i>My Profile</a></li>
+              <li><a class="dropdown-item" href="/users/dashboard"><i class="bi bi-grid me-2"></i>Dashboard</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <form action="/logout" method="POST">
+                  <button class="dropdown-item text-danger" type="submit"><i class="bi bi-box-arrow-right me-2"></i>Logout</button>
+                </form>
+              </li>
+            </ul>
+          </li>
+
+        <% } else if (currentUser.role === 'admin') { %>
+          <li class="nav-item"><a class="nav-link" href="/jobs"><i class="bi bi-briefcase me-1"></i>Jobs</a></li>
+          <li class="nav-item"><a class="nav-link" href="/admin/users"><i class="bi bi-people me-1"></i>Users</a></li>
+          <li class="nav-item"><a class="nav-link" href="/admin/jobs"><i class="bi bi-list-ul me-1"></i>All Jobs</a></li>
+          <li class="nav-item ms-1"><a class="btn-primary-custom" href="/admin"><i class="bi bi-shield-check me-1"></i>Admin</a></li>
+          <li class="nav-item dropdown ms-1">
+            <a class="nav-link dropdown-toggle user-avatar-nav" href="#" data-bs-toggle="dropdown">
+              <span class="avatar-initials admin-avatar"><%= currentUser.username.charAt(0).toUpperCase() %></span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end custom-dropdown">
+              <li><span class="dropdown-item-text fw-semibold"><%= currentUser.username %></span></li>
+              <li><small class="dropdown-item-text text-muted" style="color:#7c3aed;">Administrator</small></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="/admin"><i class="bi bi-speedometer2 me-2"></i>Admin Panel</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <form action="/logout" method="POST">
+                  <button class="dropdown-item text-danger" type="submit"><i class="bi bi-box-arrow-right me-2"></i>Logout</button>
+                </form>
+              </li>
+            </ul>
+          </li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+</nav>

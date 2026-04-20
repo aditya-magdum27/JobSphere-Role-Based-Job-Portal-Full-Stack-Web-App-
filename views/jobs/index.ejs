@@ -1,0 +1,109 @@
+<%- include('../partials/head') %>
+<%- include('../partials/navbar') %>
+<%- include('../partials/flash') %>
+<main class="main-content">
+
+<div class="page-hero">
+  <div class="container">
+    <div class="row align-items-center g-3">
+      <div class="col-lg-7">
+        <p class="section-label text-white opacity-50 mb-2">Discover Opportunities</p>
+        <h1 class="text-white"><%= totalJobs.toLocaleString() %> Jobs<br><span style="color:var(--accent)">Waiting for You</span></h1>
+        <p class="lead">Find your dream role from top companies worldwide.</p>
+      </div>
+      <div class="col-lg-5">
+        <div class="row g-2">
+          <div class="col-6"><div class="hero-stat"><div class="stat-number"><%= totalJobs %></div><div class="stat-label">Active Listings</div></div></div>
+          <div class="col-6"><div class="hero-stat"><div class="stat-number">100%</div><div class="stat-label">Free to Apply</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Filter Bar -->
+<div class="filter-bar">
+  <div class="container">
+    <div class="filter-chips">
+      <span class="font-syne fw-700 me-1" style="font-size:0.75rem;white-space:nowrap;color:var(--text-muted);">Filter:</span>
+      <a href="/jobs?search=<%= encodeURIComponent(search) %>" class="filter-chip <%= type==='All'?'active':'' %>">All</a>
+      <a href="/jobs?search=<%= encodeURIComponent(search) %>&type=Full-Time" class="filter-chip <%= type==='Full-Time'?'active':'' %>"><i class="bi bi-briefcase-fill"></i> Full-Time</a>
+      <a href="/jobs?search=<%= encodeURIComponent(search) %>&type=Internship" class="filter-chip <%= type==='Internship'?'active':'' %>"><i class="bi bi-mortarboard"></i> Internship</a>
+      <a href="/jobs?search=<%= encodeURIComponent(search) %>&type=Part-Time" class="filter-chip <%= type==='Part-Time'?'active':'' %>"><i class="bi bi-clock"></i> Part-Time</a>
+      <a href="/jobs?search=<%= encodeURIComponent(search) %>&type=Remote" class="filter-chip <%= type==='Remote'?'active':'' %>"><i class="bi bi-globe"></i> Remote</a>
+      <a href="/jobs?search=<%= encodeURIComponent(search) %>&type=Contract" class="filter-chip <%= type==='Contract'?'active':'' %>"><i class="bi bi-file-earmark-text"></i> Contract</a>
+    </div>
+  </div>
+</div>
+
+<div class="container mt-4">
+  <% if (search) { %>
+    <div class="mb-3 d-flex align-items-center gap-2 flex-wrap">
+      <span class="text-muted" style="font-size:0.875rem;">Results for:</span>
+      <span class="badge bg-dark px-3 py-2 rounded-pill" style="font-weight:600;">"<%= search %>"</span>
+      <a href="/jobs" class="text-accent text-decoration-none" style="font-size:0.875rem;"><i class="bi bi-x-circle me-1"></i>Clear</a>
+    </div>
+  <% } %>
+
+  <% if (jobs.length === 0) { %>
+    <div class="empty-state">
+      <div class="empty-state-icon"><i class="bi bi-search"></i></div>
+      <h4>No jobs found</h4>
+      <p>Try adjusting your search or filters.</p>
+      <a href="/jobs" class="btn btn-ink mt-2">Browse All Jobs</a>
+    </div>
+  <% } else { %>
+    <div class="row g-3 g-md-4">
+      <% jobs.forEach(function(job) { %>
+        <div class="col-12 col-md-6 col-xl-4">
+          <div class="job-card" data-href="/jobs/<%= job._id %>">
+            <div class="d-flex align-items-center gap-3">
+              <% if (job.logo && job.logo.url) { %>
+                <img src="<%= job.logo.url %>" alt="<%= job.companyName %>" class="job-logo" />
+              <% } else { %>
+                <div class="job-logo-placeholder"><%= job.companyName.charAt(0).toUpperCase() %></div>
+              <% } %>
+              <div style="min-width:0;">
+                <div class="job-company text-truncate"><%= job.companyName %></div>
+                <% if (job.location) { %>
+                  <div style="font-size:0.75rem;color:var(--text-muted);margin-top:1px;" class="text-truncate"><i class="bi bi-geo-alt me-1"></i><%= job.location %></div>
+                <% } %>
+              </div>
+            </div>
+            <a href="/jobs/<%= job._id %>" class="job-card-title text-truncate"><%= job.title %></a>
+            <div class="job-meta">
+              <%
+                var tcMap={'Full-Time':'badge-full-time','Internship':'badge-internship','Part-Time':'badge-part-time','Contract':'badge-contract','Remote':'badge-remote'};
+                var tc=tcMap[job.type]||'badge-full-time';
+              %>
+              <span class="badge-type <%= tc %>"><%= job.type %></span>
+              <% if (job.salary && job.salary!=='Not disclosed') { %>
+                <span class="job-info-chip"><i class="bi bi-currency-dollar"></i><%= job.salary %></span>
+              <% } %>
+            </div>
+            <% if (job.description) { %>
+              <p class="text-truncate-2" style="font-size:0.8rem;color:var(--text-muted);margin-top:0.6rem;"><%= job.description.substring(0,110) %></p>
+            <% } %>
+            <div class="job-card-footer">
+              <span class="job-date"><i class="bi bi-clock me-1"></i><%= new Date(job.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}) %></span>
+              <a href="/jobs/<%= job._id %>" class="btn btn-ink btn-sm px-3" style="font-size:0.8rem;">View Job</a>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+
+    <% if (totalPages > 1) { %>
+      <div class="pagination-wrapper">
+        <a href="/jobs?search=<%= search %>&type=<%= type %>&page=<%= currentPage-1 %>" class="page-btn <%= currentPage<=1?'disabled':'' %>"><i class="bi bi-chevron-left"></i></a>
+        <% for (var i=1;i<=totalPages;i++) { %>
+          <a href="/jobs?search=<%= search %>&type=<%= type %>&page=<%= i %>" class="page-btn <%= i===currentPage?'active':'' %>"><%= i %></a>
+        <% } %>
+        <a href="/jobs?search=<%= search %>&type=<%= type %>&page=<%= currentPage+1 %>" class="page-btn <%= currentPage>=totalPages?'disabled':'' %>"><i class="bi bi-chevron-right"></i></a>
+      </div>
+    <% } %>
+  <% } %>
+</div>
+</main>
+<%- include('../partials/footer') %>
+<%- include('../partials/scripts') %>
